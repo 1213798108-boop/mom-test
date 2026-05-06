@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>母亲节MTBI人格测试 | 测测你是什么宝藏妈妈</title>
-    <!-- 在线二维码依赖库 -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <style>
         * {
@@ -149,12 +148,52 @@
             background: #eee;
             color: #666;
         }
-        /* 海报画布 默认隐藏 */
         #posterCanvas {
             display: none;
+        }
+
+        /* 👇 我加的海报弹窗样式（只加了这个） */
+        .poster-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            border-radius: 15px;
-            margin-top: 20px;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            z-index: 99999;
+            justify-content: center;
+            align-items: center;
+        }
+        .poster-modal.show {
+            display: flex;
+        }
+        .poster-wrapper {
+            width: 85%;
+            max-width: 380px;
+            background: #fff;
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+        }
+        .poster-img {
+            width: 100%;
+            border-radius: 12px;
+        }
+        .poster-tip {
+            margin-top: 12px;
+            font-size: 15px;
+            color: #e86a92;
+            font-weight: bold;
+        }
+        .poster-close {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #eee;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -168,32 +207,34 @@
             <div class="progress-fill" id="progressFill"></div>
         </div>
         <div id="questionBox"></div>
-
         <div class="result-wrap" id="resultBox">
             <img class="mom-illust" id="momIllust" src="" alt="妈妈人格插画">
             <div class="type-code" id="typeCode"></div>
             <div class="type-title" id="typeTitle"></div>
             <div class="type-desc" id="typeDesc"></div>
-
-            <!-- 页面引流：试听课二维码 -->
             <div class="qrcode-block">
                 <h3>🎁 扫码领取专属试听课</h3>
                 <img class="qrcode-img" src="qrcode.png" alt="试听课二维码">
                 <p class="qrcode-tip">长按识别，免费领取各年级试听课程</p>
             </div>
-
             <div class="btn-row">
                 <button class="btn btn-pink" onclick="createSharePoster()">生成分享海报</button>
                 <button class="btn btn-gray" onclick="restartTest()">重新测试</button>
             </div>
-
-            <!-- 生成的裂变海报 -->
             <canvas id="posterCanvas" width="750" height="1200"></canvas>
         </div>
     </div>
 
+    <!-- 👇 我加的海报弹窗（只加了这个） -->
+    <div class="poster-modal" id="posterModal">
+        <div class="poster-wrapper">
+            <img id="posterDisplay" class="poster-img">
+            <div class="poster-tip">长按图片保存海报</div>
+            <button class="poster-close" onclick="closePoster()">关闭</button>
+        </div>
+    </div>
+
     <script>
-        // 12道测试题
         const questions = [
             {text:"1. 孩子受委屈哭了，你的第一反应？",options:[
                 {text:"A. 先拥抱安抚，共情情绪，慢慢开导","dim":"E"},
@@ -244,110 +285,34 @@
                 {text:"B. 只求平安快乐，顺其自然长大","dim":"F,L"}
             ]}
         ];
-
-        // 16型人格 完整名称+解析+对应插画
         const typeData = {
-            ESPO:{
-                title:"暖心操心大姐型妈妈",
-                desc:"温柔共情拉满，陪娃超用心，生活照顾精致到细节，天生爱操心、顾家又体贴，嘴上不唠叨，心里装着全家所有人的冷暖，是家里永远的温暖靠山。",
-                img:"mom1.png"
-            },
-            ESPF:{
-                title:"浪漫松弛仙女型妈妈",
-                desc:"懂生活有仪式感，把童年养得温柔又精致，愿意花时间陪娃，但绝不内卷焦虑，心态松弛通透，既能给孩子宠爱，也能放过自己。",
-                img:"mom2.png"
-            },
-            ESLO:{
-                title:"接地气温柔顾家型妈妈",
-                desc:"不搞虚排场，过日子踏实又节俭，温柔脾气好，愿意花时间陪伴，默默包揽家里大小事，靠谱又暖心，典型贤妻良母款。",
-                img:"mom3.png"
-            },
-            ESLF:{
-                title:"佛系随和治愈型妈妈",
-                desc:"性格不争不抢，养娃接地气不攀比，不捆绑式陪伴，尊重孩子节奏，家庭氛围轻松又舒服，自己活得自在，孩子也成长得无忧无虑。",
-                img:"mom4.png"
-            },
-            EIPO:{
-                title:"安静细腻守护型妈妈",
-                desc:"外表内敛低调，不黏人不啰嗦，懂得给孩子独立空间，私下却默默操心所有细节，生活照顾精致周到，温柔都藏在沉默的付出里。",
-                img:"mom5.png"
-            },
-            EIPF:{
-                title:"高情商通透佛系妈妈",
-                desc:"人间清醒不内耗，不控制不唠叨，给孩子充分自由，生活有品位有格调，从不被育儿焦虑裹挟，从容淡定做自己。",
-                img:"mom6.png"
-            },
-            EILO:{
-                title:"低调实干暖心型妈妈",
-                desc:"安静不爱热闹，不跟风亲子打卡，养娃务实不浪费，责任心极强，话不多但做事靠谱，默默把家庭和孩子都照顾得妥妥帖帖。",
-                img:"mom7.png"
-            },
-            EILF:{
-                title:"随心自在躺平型妈妈",
-                desc:"最松弛的一类妈妈，不鸡娃、不攀比、不焦虑，尊重孩子天性，不强行规划人生，自己活得通透，也给孩子满满的自由。",
-                img:"mom8.png"
-            },
-            RSPO:{
-                title:"理智远见规划型妈妈",
-                desc:"清醒有原则，不溺爱不纵容，三观正底线清，擅长给孩子做长远规划，陪伴走心有温度，既是严师也是温柔后盾。",
-                img:"mom9.png"
-            },
-            RSPF:{
-                title:"张弛有度智慧型妈妈",
-                desc:"有规矩但不苛刻，懂陪伴懂仪式感，热衷亲子时光，却不盲目内卷，育儿节奏自己掌控，从容又有分寸。",
-                img:"mom10.png"
-            },
-            RSLO:{
-                title:"稳重靠谱当家型妈妈",
-                desc:"接地气懂生活，做事有条理，不追求浮华，踏实过日子，为家庭默默操劳，理智又稳重，是家里的主心骨。",
-                img:"mom11.png"
-            },
-            RSLF:{
-                title:"清醒佛系随缘型妈妈",
-                desc:"三观端正有底线，陪娃走心不走形式，养娃务实不跟风，心态平稳不内耗，看得开、不纠结，育儿生活简简单单。",
-                img:"mom12.png"
-            },
-            RIPO:{
-                title:"独立高冷自律型妈妈",
-                desc:"独立清醒有主见，不情绪化不啰嗦，懂得留白尊重成长，大方向严格把控，底线清晰，从不盲目从众育儿。",
-                img:"mom13.png"
-            },
-            RIPF:{
-                title:"人间清醒优雅型妈妈",
-                desc:"不被育儿舆论绑架，有自己的教育节奏，生活有品位、内心超淡然，不焦虑不内卷，优雅从容当好妈妈。",
-                img:"mom14.png"
-            },
-            RILO:{
-                title:"沉默担当实干型妈妈",
-                desc:"低调自律踏实过日子，不张扬不攀比，看重孩子品行与自律，不善言辞却默默扛下所有责任，温柔且有力量。",
-                img:"mom15.png"
-            },
-            RILF:{
-                title:"极致松弛通透型妈妈",
-                desc:"全网最不内耗妈妈，守好原则其余全部随缘，接纳孩子平凡，也放过自己，不鸡娃不控制，活得最通透自在。",
-                img:"mom16.png"
-            }
+            ESPO:{title:"暖心操心大姐型妈妈",desc:"温柔共情拉满，陪娃超用心，生活照顾精致到细节，天生爱操心、顾家又体贴，嘴上不唠叨，心里装着全家所有人的冷暖，是家里永远的温暖靠山。",img:"mom1.png"},
+            ESPF:{title:"浪漫松弛仙女型妈妈",desc:"懂生活有仪式感，把童年养得温柔又精致，愿意花时间陪娃，但绝不内卷焦虑，心态松弛通透，既能给孩子宠爱，也能放过自己。",img:"mom2.png"},
+            ESLO:{title:"接地气温柔顾家型妈妈",desc:"不搞虚排场，过日子踏实又节俭，温柔脾气好，愿意花时间陪伴，默默包揽家里大小事，靠谱又暖心，典型贤妻良母款。",img:"mom3.png"},
+            ESLF:{title:"佛系随和治愈型妈妈",desc:"性格不争不抢，养娃接地气不攀比，不捆绑式陪伴，尊重孩子节奏，家庭氛围轻松又舒服，自己活得自在，孩子也成长得无忧无虑。",img:"mom4.png"},
+            EIPO:{title:"安静细腻守护型妈妈",desc:"外表内敛低调，不黏人不啰嗦，懂得给孩子独立空间，私下却默默操心所有细节，生活照顾精致周到，温柔都藏在沉默的付出里。",img:"mom5.png"},
+            EIPF:{title:"高情商通透佛系妈妈",desc:"人间清醒不内耗，不控制不唠叨，给孩子充分自由，生活有品位有格调，从不被育儿焦虑裹挟，从容淡定做自己。",img:"mom6.png"},
+            EILO:{title:"低调实干暖心型妈妈",desc:"安静不爱热闹，不跟风亲子打卡，养娃务实不浪费，责任心极强，话不多但做事靠谱，默默把家庭和孩子都照顾得妥妥帖帖。",img:"mom7.png"},
+            EILF:{title:"随心自在躺平型妈妈",desc:"最松弛的一类妈妈，不鸡娃、不攀比、不焦虑，尊重孩子天性，不强行规划人生，自己活得通透，也给孩子满满的自由。",img:"mom8.png"},
+            RSPO:{title:"理智远见规划型妈妈",desc:"清醒有原则，不溺爱不纵容，三观正底线清，擅长给孩子做长远规划，陪伴走心有温度，既是严师也是温柔后盾。",img:"mom9.png"},
+            RSPF:{title:"张弛有度智慧型妈妈",desc:"有规矩但不苛刻，懂陪伴懂仪式感，热衷亲子时光，却不盲目内卷，育儿节奏自己掌控，从容又有分寸。",img:"mom10.png"},
+            RSLO:{title:"稳重靠谱当家型妈妈",desc:"接地气懂生活，做事有条理，不追求浮华，踏实过日子，为家庭默默操劳，理智又稳重，是家里的主心骨。",img:"mom11.png"},
+            RSLF:{title:"清醒佛系随缘型妈妈",desc:"三观端正有底线，陪娃走心不走形式，养娃务实不跟风，心态平稳不内耗，看得开、不纠结，育儿生活简简单单。",img:"mom12.png"},
+            RIPO:{title:"独立高冷自律型妈妈",desc:"独立清醒有主见，不情绪化不啰嗦，懂得留白尊重成长，大方向严格把控，底线清晰，从不盲目从众育儿。",img:"mom13.png"},
+            RIPF:{title:"人间清醒优雅型妈妈",desc:"不被育儿舆论绑架，有自己的教育节奏，生活有品位、内心超淡然，不焦虑不内卷，优雅从容当好妈妈。",img:"mom14.png"},
+            RILO:{title:"沉默担当实干型妈妈",desc:"低调自律踏实过日子，不张扬不攀比，看重孩子品行与自律，不善言辞却默默扛下所有责任，温柔且有力量。",img:"mom15.png"},
+            RILF:{title:"极致松弛通透型妈妈",desc:"全网最不内耗妈妈，守好原则其余全部随缘，接纳孩子平凡，也放过自己，不鸡娃不控制，活得最通透自在。",img:"mom16.png"}
         };
-
         let currentQ = 0;
         let score = {E:0,R:0,S:0,I:0,P:0,L:0,O:0,F:0};
         let nowTypeCode = "";
         let nowTypeInfo = {};
 
-        // 渲染题目
         function renderQ(){
             const box = document.getElementById("questionBox");
             const q = questions[currentQ];
-            box.innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">${q.text}</div>
-                    ${q.options.map((item,idx)=>`
-                        <div class="option-item" data-dim="${item.dim}">${item.text}</div>
-                    `).join("")}
-                </div>
-            `;
+            box.innerHTML = `<div class="question-box"><div class="question-text">${q.text}</div>${q.options.map((item,idx)=>`<div class="option-item" data-dim="${item.dim}">${item.text}</div>`).join("")}</div>`;
             document.getElementById("progressFill").style.width = `${(currentQ+1)/questions.length*100}%`;
-
             document.querySelectorAll(".option-item").forEach(el=>{
                 el.onclick = function(){
                     let dims = this.dataset.dim.split(",");
@@ -356,17 +321,12 @@
                     this.classList.add("selected");
                     setTimeout(()=>{
                         currentQ++;
-                        if(currentQ < questions.length){
-                            renderQ();
-                        }else{
-                            showResult();
-                        }
+                        if(currentQ < questions.length){renderQ();}else{showResult();}
                     },300);
                 }
             });
         }
 
-        // 展示测试结果
         function showResult(){
             let EorR = score.E >= score.R ? "E" : "R";
             let SorI = score.S >= score.I ? "S" : "I";
@@ -374,86 +334,65 @@
             let OorF = score.O >= score.F ? "O" : "F";
             nowTypeCode = EorR+SorI+PorL+OorF;
             nowTypeInfo = typeData[nowTypeCode];
-
             document.getElementById("typeCode").innerText = nowTypeCode;
             document.getElementById("typeTitle").innerText = nowTypeInfo.title;
             document.getElementById("typeDesc").innerText = nowTypeInfo.desc;
             document.getElementById("momIllust").src = nowTypeInfo.img;
-
             document.getElementById("questionBox").style.display = "none";
             document.getElementById("resultBox").style.display = "block";
         }
 
-        // 重新测试
         function restartTest(){
             currentQ = 0;
             score = {E:0,R:0,S:0,I:0,P:0,L:0,O:0,F:0};
             document.getElementById("resultBox").style.display = "none";
             document.getElementById("questionBox").style.display = "block";
-            document.getElementById("posterCanvas").style.display = "none";
+            document.getElementById("posterModal").classList.remove("show");
             renderQ();
         }
 
-        // 生成裂变分享海报
+        // 👇 优化后的海报生成（弹窗显示）
         async function createSharePoster(){
             const canvas = document.getElementById("posterCanvas");
             const ctx = canvas.getContext("2d");
-            // 获取当前页面链接，自动生成二维码
             const testUrl = window.location.href.split('#')[0];
-
-            // 清空画布 底色
             ctx.fillStyle = '#fff5f8';
             ctx.fillRect(0,0,750,1200);
-
-            // 标题
             ctx.fillStyle = '#e86a92';
             ctx.font = 'bold 46px PingFang SC,Microsoft YaHei';
             ctx.textAlign = 'center';
             ctx.fillText('母亲节MTBI妈妈人格测试',375,100);
-
-            // 加载人格插画
             const img = new Image();
             img.crossOrigin = 'anonymous';
             img.src = nowTypeInfo.img;
-            await new Promise(resolve=>{
-                img.onload = resolve;
-            });
+            await new Promise(resolve=>{img.onload = resolve;});
             ctx.drawImage(img,185,160,380,380);
-
-            // 人格类型编码
             ctx.fillStyle = '#e86a92';
             ctx.font = 'bold 42px PingFang SC,Microsoft YaHei';
             ctx.fillText(nowTypeCode,375,600);
-
-            // 人格名称
             ctx.fillStyle = '#333';
             ctx.font = 'bold 38px PingFang SC,Microsoft YaHei';
             ctx.fillText(nowTypeInfo.title,375,650);
-
-            // 简介文案自动换行
             ctx.fillStyle = '#555';
             ctx.font = '28px PingFang SC,Microsoft YaHei';
             wrapText(ctx, nowTypeInfo.desc, 375, 720, 620, 42);
-
-            // 提示文字
             ctx.fillStyle = '#666';
             ctx.font = '26px PingFang SC,Microsoft YaHei';
             ctx.fillText('长按识别二维码 测测你是什么妈妈',375,900);
-
-            // 生成测试入口二维码 画到海报底部
             const qrCanvas = document.createElement('canvas');
-            await QRCode.toCanvas(qrCanvas, testUrl, {
-                width:200,
-                margin:1
-            });
+            await QRCode.toCanvas(qrCanvas, testUrl, {width:200, margin:1});
             ctx.drawImage(qrCanvas,275,930,200,200);
 
-            // 显示海报
-            canvas.style.display = 'block';
-            alert('海报已生成！长按图片即可保存，发朋友圈～');
+            // 显示到弹窗
+            document.getElementById("posterDisplay").src = canvas.toDataURL("image/png");
+            document.getElementById("posterModal").classList.add("show");
         }
 
-        // 文字换行工具
+        // 关闭海报
+        function closePoster(){
+            document.getElementById("posterModal").classList.remove("show");
+        }
+
         function wrapText(ctx, text, x, y, maxWidth, lineHeight){
             let line = '';
             for(let i=0;i<text.length;i++){
@@ -462,17 +401,12 @@
                     ctx.fillText(line,x,y);
                     line = text[i];
                     y += lineHeight;
-                }else{
-                    line = testLine;
-                }
+                }else{line = testLine;}
             }
             ctx.fillText(line,x,y);
         }
 
-        // 初始化
-        window.onload = function(){
-            renderQ();
-        };
+        window.onload = function(){renderQ();};
     </script>
 </body>
 </html>
