@@ -15,6 +15,7 @@
         body {
             background: #fff5f8;
             color: #333;
+            line-height: 1.6;
         }
         .container {
             max-width: 600px;
@@ -29,6 +30,7 @@
             color: #e86a92;
             font-size: 26px;
             margin-bottom: 8px;
+            letter-spacing: 1px;
         }
         .header p {
             color: #777;
@@ -49,20 +51,20 @@
         }
         .question-box {
             background: #fff;
-            border-radius: 16px;
-            padding: 22px;
-            margin-bottom: 18px;
-            box-shadow: 0 2px 12px rgba(232,106,146,0.12);
+            border-radius: 18px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 15px rgba(232,106,146,0.1);
         }
         .question-text {
             font-size: 17px;
-            margin-bottom: 20px;
-            line-height: 1.6;
+            margin-bottom: 22px;
+            line-height: 1.7;
         }
         .option-item {
-            padding: 14px 16px;
+            padding: 15px 18px;
             border: 2px solid #f3e4eb;
-            border-radius: 12px;
+            border-radius: 14px;
             margin-bottom: 12px;
             font-size: 16px;
             cursor: pointer;
@@ -76,47 +78,53 @@
         .result-wrap {
             display: none;
             background: #fff;
-            border-radius: 16px;
-            padding: 25px 20px;
+            border-radius: 20px;
+            padding: 30px 24px;
             text-align: center;
-            box-shadow: 0 2px 12px rgba(232,106,146,0.12);
+            box-shadow: 0 3px 18px rgba(232,106,146,0.12);
         }
         .mom-illust {
             width: 180px;
             height: 180px;
-            margin: 0 auto 15px;
-            border-radius: 12px;
+            margin: 0 auto 18px;
+            border-radius: 16px;
             object-fit: cover;
         }
         .type-code {
-            font-size: 32px;
+            font-size: 34px;
             font-weight: bold;
             color: #e86a92;
             margin: 10px 0;
+            letter-spacing: 1px;
         }
         .type-title {
-            font-size: 20px;
+            font-size: 21px;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
+            color: #333;
         }
+        /* 两端对齐，更整洁美观 */
         .type-desc {
-            font-size: 15px;
+            font-size: 16px;
             color: #555;
-            line-height: 1.8;
-            padding: 0 10px;
-            margin-bottom: 25px;
+            line-height: 1.9;
+            padding: 0 8px;
+            margin-bottom: 28px;
+            text-align: justify;
+            text-justify: inter-ideograph;
+            letter-spacing: 0.3px;
         }
         .qrcode-block {
             background: #fff5f8;
             border: 1px dashed #e86a92;
-            border-radius: 14px;
-            padding: 20px;
-            margin: 20px 0;
+            border-radius: 16px;
+            padding: 22px;
+            margin: 24px 0;
         }
         .qrcode-block h3 {
             font-size: 17px;
             color: #e86a92;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
         .qrcode-img {
             width: 160px;
@@ -129,30 +137,35 @@
         }
         .btn-row {
             display: flex;
-            gap: 12px;
-            margin-top: 20px;
+            gap: 14px;
+            margin-top: 24px;
         }
         .btn {
             flex: 1;
-            padding: 13px;
+            padding: 15px;
             border-radius: 30px;
             border: none;
             font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
+            transition: 0.2s;
         }
         .btn-pink {
             background: #e86a92;
             color: #fff;
         }
+        .btn-pink:active {
+            transform: scale(0.97);
+        }
         .btn-gray {
-            background: #eee;
+            background: #f6f6f6;
             color: #666;
         }
         #posterCanvas {
             display: none;
         }
 
-        /* 👇 我加的海报弹窗样式（只加了这个） */
+        /* 海报弹窗（居中浮层，好长按） */
         .poster-modal {
             display: none;
             position: fixed;
@@ -172,24 +185,24 @@
             width: 85%;
             max-width: 380px;
             background: #fff;
-            border-radius: 20px;
-            padding: 15px;
+            border-radius: 22px;
+            padding: 18px;
             text-align: center;
         }
         .poster-img {
             width: 100%;
-            border-radius: 12px;
+            border-radius: 14px;
         }
         .poster-tip {
-            margin-top: 12px;
+            margin-top: 14px;
             font-size: 15px;
             color: #e86a92;
             font-weight: bold;
         }
         .poster-close {
-            margin-top: 10px;
-            padding: 8px 16px;
-            background: #eee;
+            margin-top: 12px;
+            padding: 9px 18px;
+            background: #f6f6f6;
             border: none;
             border-radius: 20px;
             font-size: 14px;
@@ -225,7 +238,6 @@
         </div>
     </div>
 
-    <!-- 👇 我加的海报弹窗（只加了这个） -->
     <div class="poster-modal" id="posterModal">
         <div class="poster-wrapper">
             <img id="posterDisplay" class="poster-img">
@@ -327,17 +339,21 @@
             });
         }
 
+        // 🔥 原版纯公平计算，无任何权重、无随机
         function showResult(){
             let EorR = score.E >= score.R ? "E" : "R";
             let SorI = score.S >= score.I ? "S" : "I";
             let PorL = score.P >= score.L ? "P" : "L";
             let OorF = score.O >= score.F ? "O" : "F";
-            nowTypeCode = EorR+SorI+PorL+OorF;
+
+            nowTypeCode = EorR + SorI + PorL + OorF;
             nowTypeInfo = typeData[nowTypeCode];
+
             document.getElementById("typeCode").innerText = nowTypeCode;
             document.getElementById("typeTitle").innerText = nowTypeInfo.title;
             document.getElementById("typeDesc").innerText = nowTypeInfo.desc;
             document.getElementById("momIllust").src = nowTypeInfo.img;
+
             document.getElementById("questionBox").style.display = "none";
             document.getElementById("resultBox").style.display = "block";
         }
@@ -351,7 +367,6 @@
             renderQ();
         }
 
-        // 👇 优化后的海报生成（弹窗显示）
         async function createSharePoster(){
             const canvas = document.getElementById("posterCanvas");
             const ctx = canvas.getContext("2d");
@@ -383,12 +398,10 @@
             await QRCode.toCanvas(qrCanvas, testUrl, {width:200, margin:1});
             ctx.drawImage(qrCanvas,275,930,200,200);
 
-            // 显示到弹窗
             document.getElementById("posterDisplay").src = canvas.toDataURL("image/png");
             document.getElementById("posterModal").classList.add("show");
         }
 
-        // 关闭海报
         function closePoster(){
             document.getElementById("posterModal").classList.remove("show");
         }
