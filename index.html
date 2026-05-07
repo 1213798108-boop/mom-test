@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>母亲节MTBI妈妈人格测试 | 测测你是什么宝藏妈妈</title>
+    <title>母亲节MTBI人格测试 | 测测你是什么宝藏妈妈</title>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <style>
         * {
@@ -103,6 +103,7 @@
             margin-bottom: 18px;
             color: #333;
         }
+        /* 两端对齐，更整洁美观 */
         .type-desc {
             font-size: 16px;
             color: #555;
@@ -164,6 +165,7 @@
             display: none;
         }
 
+        /* 海报弹窗（居中浮层，好长按） */
         .poster-modal {
             display: none;
             position: fixed;
@@ -337,6 +339,7 @@
             });
         }
 
+        // 🔥 原版纯公平计算，无任何权重、无随机
         function showResult(){
             let EorR = score.E >= score.R ? "E" : "R";
             let SorI = score.S >= score.I ? "S" : "I";
@@ -387,10 +390,7 @@
             ctx.fillText(nowTypeInfo.title,375,650);
             ctx.fillStyle = '#555';
             ctx.font = '28px PingFang SC,Microsoft YaHei';
-            
-            // ✅ 海报人格解析 → 完美两端对齐（和页面完全一致）
-            wrapTextJustify(ctx, nowTypeInfo.desc, 65, 720, 620, 42);
-            
+            wrapText(ctx, nowTypeInfo.desc, 375, 720, 620, 42);
             ctx.fillStyle = '#666';
             ctx.font = '26px PingFang SC,Microsoft YaHei';
             ctx.fillText('长按识别二维码 测测你是什么妈妈',375,900);
@@ -406,42 +406,17 @@
             document.getElementById("posterModal").classList.remove("show");
         }
 
-        // ✅ 核心修复：海报文字两端对齐
-        function wrapTextJustify(ctx, text, x, y, maxWidth, lineHeight) {
-            const words = text.split('');
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight){
             let line = '';
-            let lines = [];
-            for (let i = 0; i < words.length; i++) {
-                const testLine = line + words[i];
-                if (ctx.measureText(testLine).width > maxWidth && i > 0) {
-                    lines.push(line);
-                    line = words[i];
-                } else {
-                    line = testLine;
-                }
+            for(let i=0;i<text.length;i++){
+                let testLine = line + text[i];
+                if(ctx.measureText(testLine).width > maxWidth){
+                    ctx.fillText(line,x,y);
+                    line = text[i];
+                    y += lineHeight;
+                }else{line = testLine;}
             }
-            lines.push(line);
-            lines.forEach((ln, idx) => {
-                if (idx < lines.length - 1 && ctx.measureText(ln).width > maxWidth * 0.8) {
-                    drawJustifiedLine(ctx, ln, x, y, maxWidth);
-                } else {
-                    ctx.fillText(ln, x, y);
-                }
-                y += lineHeight;
-            });
-        }
-
-        function drawJustifiedLine(ctx, text, x, y, maxWidth) {
-            const chars = text.split('');
-            const charCount = chars.length - 1;
-            if (charCount <= 0) { ctx.fillText(text, x, y); return; }
-            const totalTextWidth = ctx.measureText(text).width;
-            const space = (maxWidth - totalTextWidth) / charCount;
-            let currentX = x;
-            chars.forEach((c, i) => {
-                ctx.fillText(c, currentX, y);
-                currentX += ctx.measureText(c).width + space;
-            });
+            ctx.fillText(line,x,y);
         }
 
         window.onload = function(){renderQ();};
